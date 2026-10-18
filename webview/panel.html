@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="{{csp}}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Code Drift Detection AI</title>
+  <link rel="stylesheet" href="{{styleUri}}">
+</head>
+<body>
+  <div class="shell">
+    <!-- Top Action & Navigation Toolbar -->
+    <header class="toolbar">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1 class="brand-title">Drift AI Engine</h1>
+          <span class="brand-subtitle">Direction & Architectural Alignment</span>
+        </div>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btnRescan" class="btn btn-primary" title="Trigger a fresh workspace analysis">
+          <span class="icon">⟳</span> Rescan Workspace
+        </button>
+        <button id="btnPauseToggle" class="btn btn-secondary" title="Toggle automatic re-analysis on document save">
+          <span class="icon" id="pauseToggleIcon">⏸</span> <span id="pauseToggleText">Auto-Scan: Active</span>
+        </button>
+        <button id="btnEditGoal" class="btn btn-secondary" title="Update project goal and description">
+          <span class="icon">✎</span> Edit Goal
+        </button>
+        <button id="btnRefresh" class="btn btn-ghost" title="Refresh dashboard view from latest analysis">
+          <span class="icon">↻</span> Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- State & Alert Banners -->
+    <div id="bannerContainer" class="banner-container" aria-live="polite">
+      <div id="analyzingBanner" class="banner banner-info" style="display: none;">
+        <span class="spinner"></span>
+        <span id="analyzingText">Analyzing workspace files...</span>
+      </div>
+      <div id="pausedBanner" class="banner banner-warning" style="display: none;">
+        <span class="banner-icon">ℹ</span>
+        <span>Automatic scan on file save is currently paused. Use <strong>Rescan Workspace</strong> to run manual checks.</span>
+      </div>
+      <div id="errorBanner" class="banner banner-danger" style="display: none;">
+        <span class="banner-icon">⚠</span>
+        <span id="errorText">Analysis error occurred.</span>
+        <button id="btnDismissError" class="btn-dismiss" title="Dismiss">✕</button>
+      </div>
+    </div>
+
+    <!-- Section A: Project Overview -->
+    <section class="panel project-overview">
+      <div class="overview-header">
+        <div>
+          <span class="section-tag">PROJECT OVERVIEW</span>
+          <h2 id="projectPathTitle" class="overview-title">Active Workspace</h2>
+          <span id="projectPath" class="muted monospace">No workspace loaded</span>
+        </div>
+        <div class="meta-badges">
+          <span id="categoryBadge" class="badge badge-category">Category: Unknown</span>
+          <span id="lastUpdated" class="muted text-small">Not analyzed yet</span>
+        </div>
+      </div>
+
+      <div class="goal-box">
+        <div class="goal-header">
+          <strong class="goal-label">Project Goal:</strong>
+          <span id="projectGoalText" class="goal-content">Describe your goal to start drift analysis...</span>
+        </div>
+        <p id="projectDescText" class="goal-desc muted">No architecture details specified.</p>
+        <div id="categoryChips" class="category-chips"></div>
+      </div>
+      <div class="file-summary-strip">
+        <span>Analyzed Files: <strong id="fileCountValue">0</strong></span>
+        <span class="sep">•</span>
+        <span id="domainSummary">Detecting framework signatures...</span>
+      </div>
+    </section>
+
+    <!-- Section B: Alignment Metrics Hero -->
+    <section class="hero-grid">
+      <div class="panel hero-card">
+        <div class="hero-header">
+          <span class="hero-label">Alignment Status</span>
+          <div id="statusBadge" class="status status-neutral">Waiting</div>
+        </div>
+        <div class="score-display">
+          <div class="score-main">
+            <span class="score-number" id="scoreValue">0%</span>
+            <span class="score-caption">Alignment Score</span>
+          </div>
+          <div class="score-drift">
+            <span class="drift-number" id="driftScoreValue">0%</span>
+            <span class="score-caption">Drift Score</span>
+          </div>
+        </div>
+        <div class="alignment-track">
+          <div id="alignmentProgress" class="alignment-bar" style="width: 0%;"></div>
+        </div>
+        <div class="hero-submetrics">
+          <div>
+            <span class="submetric-label">Confidence</span>
+            <strong id="confidenceValue">0%</strong>
+          </div>
+          <div>
+            <span class="submetric-label">Readiness</span>
+            <strong id="readinessValue">Low</strong>
+          </div>
+          <div>
+            <span class="submetric-label">Feature Coverage</span>
+            <strong id="coverageValue">0%</strong>
+          </div>
+          <div>
+            <span class="submetric-label">Completion</span>
+            <strong id="completionValue">0%</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel score-breakdown-card">
+        <h3>Score Signal Breakdown</h3>
+        <p class="body-copy text-small">Calculated from 6 orthogonal, evidence-based signals (v2.0.0 explainable formula):</p>
+        <div class="breakdown-grid">
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Dynamic Requirements</span>
+              <strong id="breakdownFeatureCov">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barFeatureCov" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Lexical Similarity</span>
+              <strong id="breakdownLexical">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barLexical" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Identifier Alignment</span>
+              <strong id="breakdownId">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barId" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Library Imports</span>
+              <strong id="breakdownLib">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barLib" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Structural Richness</span>
+              <strong id="breakdownStruct">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barStruct" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span>Code Completion</span>
+              <strong id="breakdownComp">0%</strong>
+            </div>
+            <div class="bar-track"><div id="barComp" class="bar-fill" style="width: 0%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mentor Brief & Summary -->
+    <section class="panel brief-panel">
+      <h3>AI Mentor Brief</h3>
+      <p id="mentorBrief" class="body-copy">Run an analysis to generate your customized architectural mentor brief.</p>
+      <p id="projectSummary" class="body-copy muted"></p>
+    </section>
+
+    <!-- Section C: Requirement Coverage (Dynamic Features v2.0.0) -->
+    <section class="panel">
+      <div class="panel-title-row">
+        <h2>Derived Requirements & Feature Verification</h2>
+        <span class="muted text-small">AST-verified code implementation vs. stubs</span>
+      </div>
+      <div id="dynamicFeatureList" class="feature-cards-grid">
+        <p class="muted">No requirements derived yet. Start or rescan analysis.</p>
+      </div>
+    </section>
+
+    <!-- Section D: Drift Findings & Code Diagnostics -->
+    <section class="metrics-grid">
+      <!-- Diagnostics Panel -->
+      <article class="panel">
+        <div class="panel-title-row">
+          <h2>Code Diagnostics</h2>
+          <span id="diagnosticCount" class="badge badge-neutral">0 issues</span>
+        </div>
+        <p class="body-copy text-small">Syntax errors and structural warnings across workspace files:</p>
+        <div id="diagnosticsList" class="diagnostics-list">
+          <p class="muted">No syntax or structural diagnostics detected.</p>
+        </div>
+      </article>
+
+      <!-- Risk Findings Panel -->
+      <article class="panel">
+        <div class="panel-title-row">
+          <h2>Risk Analysis</h2>
+          <div id="riskBadge" class="risk risk-low">Low</div>
+        </div>
+        <p id="riskText" class="body-copy">No risk signals detected.</p>
+        <div id="riskFindingsList" class="risk-findings-list"></div>
+      </article>
+
+      <!-- Error & Fix Panel -->
+      <article class="panel">
+        <h2>Error + Fix Solution</h2>
+        <p id="errorIssue" class="body-copy">No critical syntax issue detected.</p>
+        <div id="errorLocationBox" class="location-box">
+          <span id="errorLocation">Awaiting analysis...</span>
+        </div>
+        <pre id="errorBadCode" class="code-block">Problem code snippet will appear here.</pre>
+        <pre id="errorFix" class="code-block">Suggested fix will appear here.</pre>
+      </article>
+    </section>
+
+    <!-- Action Plan & Architecture -->
+    <section class="metrics-grid">
+      <article class="panel">
+        <h2>Why It Is Drifting</h2>
+        <p id="whyDrift" class="body-copy">Run an analysis to inspect root cause explanations.</p>
+        <h3>Suggested Next Steps</h3>
+        <p id="primarySuggestion" class="body-copy">No suggestion yet.</p>
+        <ul id="suggestionList" class="list"></ul>
+      </article>
+
+      <article class="panel">
+        <h2>Architecture & Module Distribution</h2>
+        <p id="architectureType" class="body-copy">Architecture summary will appear here.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span>UI</span>
+            <div class="bar-track"><div id="uiBar" class="bar-fill ui" style="width: 0%;"></div></div>
+            <strong id="uiValue">0%</strong>
+          </div>
+          <div class="bar-row">
+            <span>Backend</span>
+            <div class="bar-track"><div id="backendBar" class="bar-fill backend" style="width: 0%;"></div></div>
+            <strong id="backendValue">0%</strong>
+          </div>
+          <div class="bar-row">
+            <span>Logic</span>
+            <div class="bar-track"><div id="logicBar" class="bar-fill logic" style="width: 0%;"></div></div>
+            <strong id="logicValue">0%</strong>
+          </div>
+        </div>
+        <ul id="architectureDetails" class="list compact" style="margin-top: 14px;"></ul>
+      </article>
+
+      <article class="panel">
+        <h2>Execution Readiness</h2>
+        <p id="readinessSummary" class="body-copy">No readiness data yet.</p>
+        <ul id="readinessSignals" class="list compact"></ul>
+        <h3 style="margin-top: 14px;">Good Parts</h3>
+        <ul id="strengthsList" class="list compact"></ul>
+      </article>
+    </section>
+
+    <!-- Strongest Matching & Missing Terms -->
+    <section class="overview-grid">
+      <article class="panel">
+        <h2>Strongest Matching Files</h2>
+        <p class="body-copy text-small">Click file paths to open directly in the editor:</p>
+        <ul id="topMatches" class="list compact interactive-list"></ul>
+      </article>
+
+      <article class="panel">
+        <h2>Missing Goal Concepts</h2>
+        <p class="body-copy text-small">Key terms extracted from goal missing from implementation:</p>
+        <ul id="missingTerms" class="chips"></ul>
+      </article>
+    </section>
+
+    <!-- File Reviews Section -->
+    <section class="panel">
+      <h2>File-by-File Alignment Review</h2>
+      <p class="body-copy text-small">Click any file to jump to its implementation:</p>
+      <ul id="fileReviews" class="list interactive-list"></ul>
+    </section>
+
+    <!-- Live Drift Trend Chart -->
+    <section class="panel">
+      <div class="panel-title-row">
+        <h2>Live Drift Trend History</h2>
+        <span id="trendHint" class="muted text-small">Graph grows with each successive scan.</span>
+      </div>
+      <svg id="trendChart" viewBox="0 0 600 220" class="trend-chart" aria-label="Drift trend chart">
+        <defs>
+          <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(69,201,164,0.35)"></stop>
+            <stop offset="100%" stop-color="rgba(69,201,164,0.02)"></stop>
+          </linearGradient>
+        </defs>
+        <line x1="24" y1="196" x2="576" y2="196" class="trend-axis"></line>
+        <path id="trendArea" class="trend-area"></path>
+        <path id="trendLine" class="trend-line"></path>
+        <g id="trendDots"></g>
+      </svg>
+    </section>
+
+  </div>
+
+  <!-- Accessible Modal Dialog for Editing Project Goal -->
+  <dialog id="goalModal" class="modal-dialog" aria-labelledby="modalTitle">
+    <form id="goalForm" method="dialog" class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Edit Project Goal</h3>
+        <button type="button" id="btnCloseModal" class="btn-close" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <label for="inputGoal" class="form-label">Project Goal (Required):</label>
+        <input type="text" id="inputGoal" class="form-input" placeholder="e.g. Build a meeting app with video calling and user auth" required />
+        
+        <label for="inputDescription" class="form-label">Implementation Details / Architecture (Optional):</label>
+        <textarea id="inputDescription" class="form-textarea" rows="3" placeholder="e.g. React frontend, Node backend API, WebRTC"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancelModal" class="btn btn-ghost">Cancel</button>
+        <button type="submit" id="btnSaveGoal" class="btn btn-primary">Save Goal & Re-scan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
+</body>
+</html>

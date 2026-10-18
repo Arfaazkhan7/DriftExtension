@@ -1,0 +1,104 @@
+{
+  "name": "live-code-drift-detection-ai",
+  "displayName": "Live Code Drift Detection AI",
+  "description": "Real-time project direction and goal alignment intelligence for VS Code.",
+  "version": "1.0.0",
+  "publisher": "drift-ai",
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Arfaazkhan7/DriftExtension.git"
+  },
+  "keywords": [
+    "drift",
+    "code-drift",
+    "architecture",
+    "static-analysis",
+    "code-quality",
+    "ai"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Machine Learning"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "driftDetection.startAnalysis",
+        "title": "Start Drift Analysis",
+        "category": "Drift AI"
+      },
+      {
+        "command": "driftDetection.openDashboard",
+        "title": "Open Drift Dashboard",
+        "category": "Drift AI"
+      },
+      {
+        "command": "driftDetection.editGoal",
+        "title": "Edit Project Goal",
+        "category": "Drift AI"
+      },
+      {
+        "command": "driftDetection.cancelAnalysis",
+        "title": "Cancel Drift Analysis",
+        "category": "Drift AI"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "driftDetection.startAnalysis",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Live Code Drift Detection AI",
+      "properties": {
+        "driftDetection.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to run the drift analysis backend."
+        },
+        "driftDetection.backendTimeout": {
+          "type": "number",
+          "default": 30000,
+          "description": "Timeout in milliseconds before a running backend analysis is safely cancelled."
+        },
+        "driftDetection.autoAnalyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Re-run project drift analysis whenever a file is saved."
+        },
+        "driftDetection.maxFiles": {
+          "type": "number",
+          "default": 500,
+          "description": "Maximum number of files sent to the backend during one analysis pass."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "compile:tests": "tsc -p tsconfig.test.json",
+    "test:backend": "python -m unittest discover -s tests/backend -p \"test_*.py\"",
+    "test:extension": "npm run compile:tests && node --test out-test/tests/extension/*.test.js",
+    "test": "npm run compile && npm run test:backend && npm run test:extension",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}
