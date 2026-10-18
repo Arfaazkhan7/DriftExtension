@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "backend"))
 
 from analyzer import DriftAnalyzer
 
-
 class TestAnalyzer(unittest.TestCase):
     def setUp(self):
         self.workspace_root = Path(__file__).resolve().parents[2]
@@ -42,7 +41,6 @@ class TestAnalyzer(unittest.TestCase):
             history=[0.30],
         )
 
-        # Weather forecast code vs crypto trading bot goal -> Danger or Drifting
         self.assertIn(result["status"], ["Drifting", "Danger"])
         self.assertLess(result["score"], 0.40)
         self.assertGreater(result["drift_score"], 0.60)
@@ -57,7 +55,6 @@ class TestAnalyzer(unittest.TestCase):
             history=[],
         )
 
-        # Stubs should NOT be marked as completed implementations
         for feature in result["features"]:
             self.assertNotEqual(
                 feature["status"],
@@ -91,7 +88,6 @@ class TestAnalyzer(unittest.TestCase):
 
         self.assertEqual(result["status"], "Insufficient Evidence")
         self.assertEqual(result["drift_score"], 1.0)
-
 
 if __name__ == "__main__":
     unittest.main()

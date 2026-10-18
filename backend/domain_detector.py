@@ -5,11 +5,7 @@ from typing import Dict, List, Set, Tuple
 from extractor import ExtractedFile
 from similarity import tokenize
 
-# Maps library/module names to the semantic concepts they implement.
-# When cv2 is imported, the project definitively involves "webcam", "vision",
-# "detection" etc. — even if those exact words never appear as identifiers.
 LIBRARY_CONCEPT_MAP: Dict[str, List[str]] = {
-    # Computer Vision
     "cv2":              ["vision", "webcam", "camera", "detect", "image", "video",
                          "capture", "frame", "movement", "track", "visual", "pixel", "draw"],
     "mediapipe":        ["recognition", "landmark", "gesture", "hand", "tracking",
@@ -18,7 +14,6 @@ LIBRARY_CONCEPT_MAP: Dict[str, List[str]] = {
     "skimage":          ["image", "vision", "visual", "detect", "segment", "filter"],
     "imageio":          ["image", "video", "capture", "read", "write"],
     "dlib":             ["face", "landmark", "detect", "recognition", "tracking"],
-    # Desktop Automation / Control
     "pyautogui":        ["mouse", "cursor", "click", "control", "keyboard", "desktop",
                          "scroll", "zoom", "screenshot", "automate", "move"],
     "pynput":           ["keyboard", "mouse", "input", "control", "click", "listen"],
@@ -27,21 +22,18 @@ LIBRARY_CONCEPT_MAP: Dict[str, List[str]] = {
     "win32api":         ["windows", "desktop", "control", "system", "api"],
     "win32con":         ["windows", "desktop", "control", "system", "constant"],
     "ctypes":           ["system", "api", "native", "control", "window", "dll"],
-    # Web / API Backend
     "flask":            ["web", "server", "api", "route", "http", "endpoint", "backend", "rest"],
     "django":           ["web", "server", "api", "model", "database", "admin", "orm", "backend"],
     "fastapi":          ["api", "server", "route", "http", "async", "rest", "backend", "openapi"],
     "tornado":          ["async", "web", "server", "http", "websocket"],
     "aiohttp":          ["async", "http", "server", "client", "api"],
     "starlette":        ["async", "web", "api", "http"],
-    # Database
     "sqlite3":          ["database", "storage", "query", "sql", "persist", "table"],
     "sqlalchemy":       ["database", "orm", "model", "query", "persist", "sql"],
     "pymongo":          ["database", "nosql", "storage", "document", "collection"],
     "redis":            ["cache", "storage", "queue", "pubsub", "key"],
     "psycopg2":         ["database", "postgres", "sql", "persist", "query"],
     "motor":            ["database", "async", "mongodb", "storage"],
-    # ML / AI
     "tensorflow":       ["machine_learning", "model", "neural", "train", "predict", "ai", "tensor"],
     "keras":            ["neural", "model", "train", "deep_learning", "ai", "layer"],
     "torch":            ["machine_learning", "neural", "model", "train", "ai", "tensor", "grad"],
@@ -49,30 +41,25 @@ LIBRARY_CONCEPT_MAP: Dict[str, List[str]] = {
     "transformers":     ["nlp", "language_model", "ai", "bert", "gpt", "tokenize", "text"],
     "spacy":            ["nlp", "text", "language", "parse", "entity", "token"],
     "nltk":             ["nlp", "text", "language", "token", "corpus", "stem"],
-    # UI / GUI
     "tkinter":          ["ui", "window", "widget", "button", "gui", "desktop", "label", "canvas"],
     "pygame":           ["game", "display", "event", "render", "graphics", "sprite", "sound"],
     "PyQt5":            ["ui", "widget", "gui", "window", "desktop", "dialog"],
     "PyQt6":            ["ui", "widget", "gui", "window", "desktop", "dialog"],
     "streamlit":        ["dashboard", "ui", "web", "data", "visualization", "interactive"],
     "gradio":           ["ui", "demo", "model", "interface", "web"],
-    # Data Analysis
     "numpy":            ["array", "compute", "matrix", "numerical", "data", "vector", "math"],
     "pandas":           ["data", "table", "analysis", "csv", "dataframe", "filter"],
     "matplotlib":       ["plot", "chart", "graph", "visualize", "display", "figure"],
     "scipy":            ["scientific", "numerical", "statistical", "compute", "optimize"],
     "plotly":           ["interactive", "chart", "plot", "visualize", "dashboard"],
-    # Network
     "requests":         ["http", "api", "web", "network", "client", "download", "fetch"],
     "httpx":            ["http", "async", "client", "api", "fetch"],
     "websockets":       ["realtime", "websocket", "streaming", "live", "push"],
     "socketio":         ["realtime", "websocket", "streaming", "live", "event"],
-    # Audio / Speech
     "pyaudio":          ["audio", "sound", "microphone", "record", "stream", "voice"],
     "sounddevice":      ["audio", "sound", "record", "playback", "stream"],
     "speech_recognition": ["speech", "voice", "audio", "recognize", "transcribe"],
     "pyttsx3":          ["speech", "text_to_speech", "voice", "audio"],
-    # JavaScript / Node libraries (detected from JS/TS files)
     "express":          ["server", "api", "route", "http", "middleware", "backend"],
     "react":            ["ui", "component", "web", "frontend", "jsx", "render"],
     "vue":              ["ui", "component", "web", "frontend", "render"],
@@ -83,24 +70,16 @@ LIBRARY_CONCEPT_MAP: Dict[str, List[str]] = {
     "next":             ["web", "frontend", "ssr", "react", "routing"],
 }
 
-# Libraries whose presence alone is strong domain evidence
 HIGH_CONFIDENCE_LIBS: Set[str] = {
     "cv2", "mediapipe", "tensorflow", "torch", "flask", "django", "fastapi",
     "pygame", "tkinter", "pyautogui", "sklearn", "transformers",
     "pyaudio", "speech_recognition",
 }
 
-
 def _base_name(token: str) -> str:
-    """Return the root module name from a dotted import path."""
     return token.split(".")[0].lower().strip()
 
-
 def get_project_library_concepts(files: List[ExtractedFile]) -> Tuple[Set[str], List[str]]:
-    """
-    Return (concept_set, known_lib_names) for all imports found across the project.
-    concept_set is the union of all semantic concepts implied by the libraries used.
-    """
     all_bases: Set[str] = set()
     for file in files:
         for tok in file.imports:
@@ -116,7 +95,6 @@ def get_project_library_concepts(files: List[ExtractedFile]) -> Tuple[Set[str], 
             concepts.update(LIBRARY_CONCEPT_MAP[base])
             known_libs.append(base)
         else:
-            # Fuzzy: handle aliased/prefixed names (e.g. "cv2.core" -> "cv2")
             for lib_key, lib_concepts in LIBRARY_CONCEPT_MAP.items():
                 if base.startswith(lib_key) or lib_key.startswith(base):
                     concepts.update(lib_concepts)
@@ -125,15 +103,7 @@ def get_project_library_concepts(files: List[ExtractedFile]) -> Tuple[Set[str], 
 
     return concepts, known_libs
 
-
 def compute_import_goal_alignment(files: List[ExtractedFile], goal_text: str) -> float:
-    """
-    Measure how well the project's imported libraries align with the stated goal.
-    This is the most reliable accuracy signal for small Python projects because
-    cv2+mediapipe definitively means "computer vision + hand recognition" even when
-    those exact words never appear as string literals in the code.
-    Returns a float in [0, 1].
-    """
     goal_tokens = set(tokenize(goal_text))
     if not goal_tokens:
         return 0.0
@@ -147,7 +117,6 @@ def compute_import_goal_alignment(files: List[ExtractedFile], goal_text: str) ->
         if goal_tok in project_concepts:
             matched += 1.0
             continue
-        # Partial/substring match (e.g. "tracking" covers "track")
         for concept in project_concepts:
             if len(goal_tok) > 3 and len(concept) > 3:
                 if goal_tok in concept or concept in goal_tok:
@@ -156,20 +125,12 @@ def compute_import_goal_alignment(files: List[ExtractedFile], goal_text: str) ->
 
     base_coverage = min(1.0, matched / max(1, len(goal_tokens)))
 
-    # High-confidence library bonus: each specific domain lib earns extra credit
     hc_bonus = sum(0.10 for lib in known_libs if lib in HIGH_CONFIDENCE_LIBS)
     hc_bonus = min(0.35, hc_bonus)
 
     return min(1.0, base_coverage + hc_bonus)
 
-
 def score_identifier_goal_alignment(files: List[ExtractedFile], goal_text: str) -> float:
-    """
-    Score how many goal concepts appear in function names, class names, and
-    variable names (identifiers). Identifiers are the strongest in-code signal
-    of implementation intent — they show what the developer *chose* to name things.
-    Returns a float in [0, 1].
-    """
     goal_tokens = set(tokenize(goal_text))
     if not goal_tokens:
         return 0.0
@@ -197,13 +158,7 @@ def score_identifier_goal_alignment(files: List[ExtractedFile], goal_text: str) 
 
     return min(1.0, matched / max(1, len(goal_tokens)))
 
-
 def compute_structural_richness(files: List[ExtractedFile]) -> float:
-    """
-    Score the structural richness of the codebase: symbols, line count, file count.
-    Indicates how much real implementation work has been done regardless of naming.
-    Returns a float in [0, 1].
-    """
     total_symbols = sum(len(f.symbols) for f in files)
     total_lines = sum(f.line_count for f in files)
     file_count = max(1, len(files))

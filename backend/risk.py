@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-
 def predict_comprehensive_risk(
     status: str,
     alignment_score: float,
@@ -12,22 +11,13 @@ def predict_comprehensive_risk(
     diagnostics_count: int,
     area_distribution: Dict[str, int],
 ) -> Dict[str, object]:
-    """
-    Distinguishes project drift risk, code quality risk, and volatility risk.
-    Returns:
-    - level: 'Low' | 'Medium' | 'High'
-    - message: primary summary string
-    - findings: list of structured findings (severity, explanation, confidence, suggestion)
-    """
     findings: List[Dict[str, object]] = []
 
-    # 1. Trend velocity & drift trajectory
     trend = 0.0
     if len(history) >= 2:
         recent = history[-4:]
         trend = recent[-1] - recent[0]
 
-    # Evaluate drift risk
     if status == "Danger" or alignment_score < 0.35:
         findings.append({
             "category": "drift",
@@ -45,7 +35,6 @@ def predict_comprehensive_risk(
             "suggested_correction": "Focus next implementation pass on unfulfilled goal requirements.",
         })
 
-    # Evaluate code quality risk
     if diagnostics_count > 0:
         findings.append({
             "category": "quality",
@@ -55,7 +44,6 @@ def predict_comprehensive_risk(
             "suggested_correction": "Resolve syntax errors and linter issues before implementing new features.",
         })
 
-    # Evaluate feature completeness risk
     if feature_coverage < 0.40:
         findings.append({
             "category": "features",
@@ -65,7 +53,6 @@ def predict_comprehensive_risk(
             "suggested_correction": "Implement foundational models and services for missing capabilities.",
         })
 
-    # Determine overall risk level
     has_high = any(f["severity"] == "high" for f in findings)
     has_med = any(f["severity"] == "medium" for f in findings)
 

@@ -7,7 +7,6 @@ from typing import Dict, List, Set
 
 from extractor import ExtractedFile
 
-# Category signatures: mapped to characteristic libraries, manifest dependencies, and file structures
 CATEGORY_INDICATORS = {
     "Web Application": {
         "manifest_keys": ["react", "vue", "svelte", "next", "nuxt", "@angular", "vite", "webpack", "tailwindcss"],
@@ -71,15 +70,9 @@ CATEGORY_INDICATORS = {
     },
 }
 
-
 def detect_project_categories(files: List[ExtractedFile], project_root: Path) -> Dict[str, object]:
-    """
-    Detect project categories based on manifest dependencies, imported libraries,
-    directory structures, and file type distributions.
-    """
     manifest_deps: Set[str] = set()
 
-    # 1. Inspect package.json
     pkg_json = project_root / "package.json"
     if pkg_json.exists():
         try:
@@ -89,7 +82,6 @@ def detect_project_categories(files: List[ExtractedFile], project_root: Path) ->
         except Exception:
             pass
 
-    # 2. Inspect requirements.txt / pyproject.toml
     req_txt = project_root / "requirements.txt"
     if req_txt.exists():
         try:
@@ -100,7 +92,6 @@ def detect_project_categories(files: List[ExtractedFile], project_root: Path) ->
         except Exception:
             pass
 
-    # 3. Aggregate imports and directories across extracted files
     all_imports = {token.lower() for f in files for token in f.imports}
     all_dirs = {part.lower() for f in files for part in Path(f.path).parts[:-1]}
     all_exts = {f.language.lower() for f in files}
@@ -112,25 +103,21 @@ def detect_project_categories(files: List[ExtractedFile], project_root: Path) ->
         score = 0.0
         evidence: List[str] = []
 
-        # Manifest matches (weight: 0.40)
         matched_manifest = [dep for dep in indicators["manifest_keys"] if any(dep in m for m in manifest_deps)]
         if matched_manifest:
             score += 0.40
             evidence.append(f"manifest:{matched_manifest[0]}")
 
-        # Import matches (weight: 0.35)
         matched_imports = [imp for imp in indicators["imports"] if any(imp in i for i in all_imports)]
         if matched_imports:
             score += min(0.35, 0.20 + 0.05 * len(matched_imports))
             evidence.append(f"imports:{','.join(matched_imports[:2])}")
 
-        # Directory matches (weight: 0.15)
         matched_dirs = [d for d in indicators["directories"] if d in all_dirs]
         if matched_dirs:
             score += 0.15
             evidence.append(f"dir:{matched_dirs[0]}")
 
-        # Extension matches (weight: 0.10)
         matched_exts = [ext for ext in indicators["extensions"] if ext in all_exts]
         if matched_exts:
             score += 0.10
@@ -139,7 +126,6 @@ def detect_project_categories(files: List[ExtractedFile], project_root: Path) ->
             category_scores[category] = score
             category_evidence[category] = evidence
 
-    # Sort categories by confidence
     sorted_categories = sorted(category_scores.items(), key=lambda item: item[1], reverse=True)
     detected = [cat for cat, score in sorted_categories if score >= 0.30]
 

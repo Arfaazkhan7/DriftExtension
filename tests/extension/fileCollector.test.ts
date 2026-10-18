@@ -57,18 +57,15 @@ describe('File Exclusion and Security Rules', () => {
     const tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'drift-test-collector-'));
 
     try {
-      // Create test files
       await fsp.writeFile(path.join(tempDir, 'main.py'), 'print("hello")');
       await fsp.writeFile(path.join(tempDir, 'index.ts'), 'console.log(1)');
       await fsp.writeFile(path.join(tempDir, '.env'), 'SECRET=123');
       await fsp.writeFile(path.join(tempDir, 'logo.png'), 'binarydata');
 
-      // Create ignored dir with file
       const gitDir = path.join(tempDir, '.git');
       await fsp.mkdir(gitDir);
       await fsp.writeFile(path.join(gitDir, 'config'), 'gitconfig');
 
-      // Create subfolder with file
       const srcDir = path.join(tempDir, 'src');
       await fsp.mkdir(srcDir);
       await fsp.writeFile(path.join(srcDir, 'app.py'), 'def run(): pass');
@@ -79,7 +76,6 @@ describe('File Exclusion and Security Rules', () => {
       const basenames = collected.map(f => path.basename(f)).sort();
       assert.deepStrictEqual(basenames, ['app.py', 'index.ts', 'main.py']);
 
-      // Test maxFiles limit
       const limitedCollector = new FileCollector({ maxFiles: 2 });
       const limited = await limitedCollector.collectFiles(tempDir);
       assert.strictEqual(limited.length, 2);

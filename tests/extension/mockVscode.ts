@@ -1,4 +1,3 @@
-// Mock VS Code API for node:test runner
 import * as Module from 'module';
 
 export interface MockWebviewPanel {
@@ -128,7 +127,6 @@ export const mockVscode = {
   },
 };
 
-// Install the require hook
 const anyModule = Module as any;
 const origRequire = anyModule.prototype.require;
 anyModule.prototype.require = function (id: string) {

@@ -34,7 +34,6 @@ JS_FUNC_PATTERN = re.compile(r"""(?:export\s+)?(?:async\s+)?function\s+([A-Za-z0
 JS_CLASS_PATTERN = re.compile(r"""(?:export\s+)?class\s+([A-Za-z0-9_$]+)""")
 JS_ROUTE_PATTERN = re.compile(r"""(?:app|router)\.(?:get|post|put|delete|patch|use)\(\s*['"]([^'"]+)['"]""")
 
-
 @dataclass
 class ExtractedFile:
     path: str
@@ -51,11 +50,9 @@ class ExtractedFile:
     capability_level: str = "basic_scanner"
     routes: List[str] = field(default_factory=list)
 
-
 def split_identifier(text: str) -> List[str]:
     normalized = CAMEL_CASE_PATTERN.sub(r"\1 \2", text.replace("-", " ").replace("_", " ").replace("/", " "))
     return [token.lower() for token in normalized.split() if len(token) >= 2]
-
 
 def extract_python_semantics(content: str) -> tuple[list[str], list[str], list[str], list[str]]:
     imports: list[str] = []
@@ -84,7 +81,6 @@ def extract_python_semantics(content: str) -> tuple[list[str], list[str], list[s
             doc = ast.get_docstring(node)
             if doc:
                 doc_parts.append(doc)
-            # Route decorators (@app.get('/route'), @app.route('/route'))
             for dec in node.decorator_list:
                 if isinstance(dec, ast.Call):
                     if hasattr(dec.func, "attr") and dec.func.attr in {"route", "get", "post", "put", "delete"}:
@@ -100,36 +96,30 @@ def extract_python_semantics(content: str) -> tuple[list[str], list[str], list[s
 
     return imports[:80], doc_parts[:20], semantic_names[:120], routes[:20]
 
-
 def extract_js_ts_semantics(content: str) -> tuple[list[str], list[str], list[str], list[str]]:
     imports: list[str] = []
     doc_parts: list[str] = []
     semantic_names: list[str] = []
     routes: list[str] = []
 
-    # Imports
     for match in JS_IMPORT_PATTERN.findall(content):
         raw_imp = match[0] or match[1]
         base_mod = raw_imp.split("/")[-1].replace("@", "")
         imports.extend(split_identifier(base_mod))
 
-    # Functions
     for match in JS_FUNC_PATTERN.findall(content):
         fn_name = match[0] or match[1]
         if fn_name:
             semantic_names.extend(split_identifier(fn_name))
 
-    # Classes
     for match in JS_CLASS_PATTERN.findall(content):
         if match:
             semantic_names.extend(split_identifier(match))
 
-    # Express / Node Routes
     for match in JS_ROUTE_PATTERN.findall(content):
         routes.append(match)
 
     return imports[:80], doc_parts[:20], semantic_names[:120], routes[:20]
-
 
 class ProjectExtractor:
     def __init__(self, config_path: Path) -> None:

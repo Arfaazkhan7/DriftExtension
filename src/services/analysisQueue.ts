@@ -18,10 +18,6 @@ export class AnalysisQueue {
     this.debounceMs = options?.debounceMs ?? 400;
   }
 
-  /**
-   * Request an analysis run, typically triggered by a file save.
-   * Multiple calls within debounceMs are coalesced into a single run.
-   */
   public requestRun(reason: string): void {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
@@ -34,9 +30,6 @@ export class AnalysisQueue {
     }, this.debounceMs);
   }
 
-  /**
-   * Immediately trigger an analysis run without debouncing (e.g. user manually clicked analyze).
-   */
   public async forceRun(reason: string): Promise<void> {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
@@ -45,16 +38,10 @@ export class AnalysisQueue {
     await this.dispatch(reason);
   }
 
-  /**
-   * Check if an analysis is currently executing.
-   */
   public get running(): boolean {
     return this.isAnalyzing;
   }
 
-  /**
-   * Get the current active run ID.
-   */
   public get activeRunId(): number {
     return this.currentRunId;
   }
@@ -69,7 +56,6 @@ export class AnalysisQueue {
   }
 
   private async dispatch(reason: string): Promise<void> {
-    // If already analyzing, queue this as a trailing-edge request
     if (this.isAnalyzing) {
       this.pendingRequest = { reason };
       return;
@@ -84,8 +70,6 @@ export class AnalysisQueue {
     } finally {
       this.isAnalyzing = false;
 
-      // Trailing edge: if a save occurred while the analysis was running,
-      // dispatch a fresh analysis immediately with the latest workspace state.
       if (this.pendingRequest) {
         const next = this.pendingRequest;
         this.pendingRequest = null;

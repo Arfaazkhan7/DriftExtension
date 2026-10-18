@@ -79,7 +79,6 @@ export class DriftDashboardPanel {
       result: session.lastResult,
     };
 
-    // Send both modern and legacy message types
     this.postMessage({
       type: 'analysisCompleted',
       runId,
@@ -126,7 +125,6 @@ export class DriftDashboardPanel {
     const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(webviewDir, 'panel.js')));
     const nonce = generateNonce();
 
-    // Restrictive Content Security Policy
     const csp = [
       `default-src 'none'`,
       `style-src ${webview.cspSource} 'unsafe-inline'`,
@@ -208,7 +206,6 @@ export class DriftDashboardPanel {
           ? path.normalize(rawPath)
           : path.normalize(path.join(session.rootPath, rawPath));
 
-        // Strict security check: ensure path is inside active workspace
         if (!isPathInsideDirectory(targetPath, session.rootPath) && targetPath !== session.rootPath) {
           vscode.window.showWarningMessage('Cannot open file: requested path escapes the active project workspace.');
           return;

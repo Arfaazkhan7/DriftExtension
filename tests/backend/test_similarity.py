@@ -13,13 +13,8 @@ from similarity import (
     compare_goal_to_code,
 )
 
-
 class TestSimilarity(unittest.TestCase):
     def test_token_normalization_regression_protected_words(self):
-        """
-        Regression test: Verify that critical technical identifiers are NOT
-        destructively truncated (e.g. 'mapping' must not become 'mapp').
-        """
         protected_cases = [
             ("mapping", "mapping"),
             ("processing", "processing"),
@@ -38,9 +33,6 @@ class TestSimilarity(unittest.TestCase):
             )
 
     def test_split_identifier_cases(self):
-        """
-        Verify case splitting for snake_case, camelCase, PascalCase, and kebab-case.
-        """
         self.assertEqual(split_identifier("userAuthentication"), ["user", "authentication"])
         self.assertEqual(split_identifier("UserAuthentication"), ["user", "authentication"])
         self.assertEqual(split_identifier("user_authentication"), ["user", "authentication"])
@@ -78,7 +70,6 @@ class TestSimilarity(unittest.TestCase):
         score, per_file, missing, coverage = compare_goal_to_code(goal, code_docs)
         self.assertGreater(score, 0.0)
         self.assertEqual(len(per_file), 2)
-
 
 if __name__ == "__main__":
     unittest.main()

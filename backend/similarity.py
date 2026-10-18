@@ -10,7 +10,6 @@ TOKEN_PATTERN = re.compile(r"[a-zA-Z0-9_]+")
 CAMEL_CASE_SPLIT = re.compile(r"([a-z0-9])([A-Z])")
 ACRONYM_SPLIT = re.compile(r"([A-Z]+)([A-Z][a-z0-9])")
 
-# General English stop words (avoid removing meaningful domain nouns like 'database', 'system', etc.)
 STOP_WORDS: Set[str] = {
     "a", "an", "the", "and", "or", "but", "if", "because", "as", "what",
     "which", "this", "that", "these", "those", "then", "just", "so", "than",
@@ -23,7 +22,6 @@ STOP_WORDS: Set[str] = {
     "would", "could", "ought", "i", "you", "he", "she", "it", "we", "they",
 }
 
-# General technical abbreviations and synonyms (domain-agnostic)
 TECHNICAL_SYNONYMS: Dict[str, str] = {
     "auth": "authentication",
     "authn": "authentication",
@@ -67,7 +65,6 @@ TECHNICAL_SYNONYMS: Dict[str, str] = {
     "var": "variable",
 }
 
-# Protected technical words that must NEVER undergo destructive suffix truncation
 PROTECTED_TECHNICAL_WORDS: Set[str] = {
     "mapping", "processing", "tracking", "logging", "classification",
     "authentication", "authorization", "configuration", "caching", "routing",
@@ -78,24 +75,14 @@ PROTECTED_TECHNICAL_WORDS: Set[str] = {
     "service", "analytics", "statistics", "diagnostics", "heuristics",
 }
 
-
 def split_identifier(token: str) -> List[str]:
-    """
-    Split snake_case, camelCase, PascalCase, and kebab-case tokens into individual words.
-    Example: 'userAuthentication_service-v2' -> ['user', 'authentication', 'service', 'v2']
-    """
     cleaned = token.replace("-", " ").replace("_", " ").replace(".", " ")
     spaced = CAMEL_CASE_SPLIT.sub(r"\1 \2", cleaned)
     spaced = ACRONYM_SPLIT.sub(r"\1 \2", spaced)
     words = [w.lower() for w in spaced.split() if w.strip()]
     return words
 
-
 def normalize_token(token: str) -> str:
-    """
-    Safely normalize a token without destructive truncation.
-    Preserves protected technical vocabulary (e.g. mapping, logging, authentication).
-    """
     token = token.lower().strip()
     if not token or len(token) < 2:
         return ""
@@ -106,7 +93,6 @@ def normalize_token(token: str) -> str:
     if token in TECHNICAL_SYNONYMS:
         return TECHNICAL_SYNONYMS[token]
 
-    # Handle plurals
     if token.endswith("ies") and len(token) > 4:
         return token[:-3] + "y"
     if token.endswith("sses") and len(token) > 4:
@@ -114,7 +100,6 @@ def normalize_token(token: str) -> str:
     if token.endswith("s") and not token.endswith(("ss", "us", "is")) and len(token) > 3:
         token = token[:-1]
 
-    # Handle past tense -ed
     if token.endswith("ed") and len(token) > 4:
         if token.endswith("ied"):
             return token[:-3] + "y"
@@ -124,13 +109,7 @@ def normalize_token(token: str) -> str:
 
     return TECHNICAL_SYNONYMS.get(token, token)
 
-
 def tokenize(text: str) -> List[str]:
-    """
-    Domain-independent tokenization.
-    Splits compound identifiers (camelCase, snake_case), normalizes tokens,
-    filters stopwords, and preserves valid technical identifiers.
-    """
     tokens: List[str] = []
     for raw_match in TOKEN_PATTERN.findall(text):
         for sub_word in split_identifier(raw_match):
@@ -138,7 +117,6 @@ def tokenize(text: str) -> List[str]:
             if len(normalized) >= 2 and normalized not in STOP_WORDS:
                 tokens.append(normalized)
     return tokens
-
 
 def build_tfidf_vectors(documents: List[str]) -> List[Dict[str, float]]:
     tokenized_docs = [tokenize(doc) for doc in documents]
@@ -161,7 +139,6 @@ def build_tfidf_vectors(documents: List[str]) -> List[Dict[str, float]]:
         vectors.append(vector)
     return vectors
 
-
 def cosine_similarity(left: Dict[str, float], right: Dict[str, float]) -> float:
     if not left or not right:
         return 0.0
@@ -175,7 +152,6 @@ def cosine_similarity(left: Dict[str, float], right: Dict[str, float]) -> float:
         return 0.0
     return min(1.0, max(0.0, numerator / (left_norm * right_norm)))
 
-
 def weighted_score(scores: List[float], weights: List[float]) -> float:
     if not scores:
         return 0.0
@@ -184,7 +160,6 @@ def weighted_score(scores: List[float], weights: List[float]) -> float:
     numerator = sum(score * weight for score, weight in head)
     denominator = sum(weight for _, weight in head) or 1.0
     return numerator / denominator
-
 
 def build_fuzzy_matches(goal_tokens: Counter[str], code_tokens: Counter[str]) -> Tuple[List[str], List[str]]:
     code_vocab = list(code_tokens.keys())
@@ -202,7 +177,6 @@ def build_fuzzy_matches(goal_tokens: Counter[str], code_tokens: Counter[str]) ->
             missing_terms.append(token)
 
     return missing_terms[:5], matched_terms
-
 
 def compare_goal_to_code(
     goal_text: str,

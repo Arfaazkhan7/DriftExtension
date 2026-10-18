@@ -1,15 +1,12 @@
 (function () {
-  // Acquire the VS Code API exactly once
   const vscode = acquireVsCodeApi();
 
-  // State management
   let latestRunId = 0;
   let isAutoScanPaused = false;
   let currentGoal = '';
   let currentDescription = '';
   let currentRootPath = '';
 
-  // DOM Elements - Toolbar
   const btnRescan = document.getElementById('btnRescan');
   const btnPauseToggle = document.getElementById('btnPauseToggle');
   const pauseToggleIcon = document.getElementById('pauseToggleIcon');
@@ -17,7 +14,6 @@
   const btnEditGoal = document.getElementById('btnEditGoal');
   const btnRefresh = document.getElementById('btnRefresh');
 
-  // DOM Elements - Banners
   const analyzingBanner = document.getElementById('analyzingBanner');
   const analyzingText = document.getElementById('analyzingText');
   const pausedBanner = document.getElementById('pausedBanner');
@@ -25,7 +21,6 @@
   const errorText = document.getElementById('errorText');
   const btnDismissError = document.getElementById('btnDismissError');
 
-  // DOM Elements - Project Overview
   const projectPathTitle = document.getElementById('projectPathTitle');
   const projectPath = document.getElementById('projectPath');
   const categoryBadge = document.getElementById('categoryBadge');
@@ -36,7 +31,6 @@
   const fileCountValue = document.getElementById('fileCountValue');
   const domainSummary = document.getElementById('domainSummary');
 
-  // DOM Elements - Hero & Scores
   const statusBadge = document.getElementById('statusBadge');
   const scoreValue = document.getElementById('scoreValue');
   const driftScoreValue = document.getElementById('driftScoreValue');
@@ -46,7 +40,6 @@
   const coverageValue = document.getElementById('coverageValue');
   const completionValue = document.getElementById('completionValue');
 
-  // DOM Elements - Breakdown
   const breakdownFeatureCov = document.getElementById('breakdownFeatureCov');
   const barFeatureCov = document.getElementById('barFeatureCov');
   const breakdownLexical = document.getElementById('breakdownLexical');
@@ -60,25 +53,21 @@
   const breakdownComp = document.getElementById('breakdownComp');
   const barComp = document.getElementById('barComp');
 
-  // DOM Elements - Mentor & Features
   const mentorBrief = document.getElementById('mentorBrief');
   const projectSummary = document.getElementById('projectSummary');
   const dynamicFeatureList = document.getElementById('dynamicFeatureList');
 
-  // DOM Elements - Diagnostics & Risk
   const diagnosticCount = document.getElementById('diagnosticCount');
   const diagnosticsList = document.getElementById('diagnosticsList');
   const riskBadge = document.getElementById('riskBadge');
   const riskText = document.getElementById('riskText');
   const riskFindingsList = document.getElementById('riskFindingsList');
 
-  // DOM Elements - Error + Fix
   const errorIssue = document.getElementById('errorIssue');
   const errorLocationBox = document.getElementById('errorLocationBox');
   const errorBadCode = document.getElementById('errorBadCode');
   const errorFix = document.getElementById('errorFix');
 
-  // DOM Elements - Architecture & Next Steps
   const whyDrift = document.getElementById('whyDrift');
   const primarySuggestion = document.getElementById('primarySuggestion');
   const suggestionList = document.getElementById('suggestionList');
@@ -94,18 +83,15 @@
   const readinessSignals = document.getElementById('readinessSignals');
   const strengthsList = document.getElementById('strengthsList');
 
-  // DOM Elements - Matches & Reviews
   const topMatches = document.getElementById('topMatches');
   const missingTerms = document.getElementById('missingTerms');
   const fileReviews = document.getElementById('fileReviews');
 
-  // DOM Elements - Trend Chart
   const trendLine = document.getElementById('trendLine');
   const trendArea = document.getElementById('trendArea');
   const trendDots = document.getElementById('trendDots');
   const trendHint = document.getElementById('trendHint');
 
-  // DOM Elements - Goal Dialog Modal
   const goalModal = document.getElementById('goalModal');
   const goalForm = document.getElementById('goalForm');
   const inputGoal = document.getElementById('inputGoal');
@@ -113,7 +99,6 @@
   const btnCloseModal = document.getElementById('btnCloseModal');
   const btnCancelModal = document.getElementById('btnCancelModal');
 
-  // Safe HTML Escaping
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -123,8 +108,6 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
-
-  // --- User Event Handlers ---
 
   if (btnRescan) {
     btnRescan.addEventListener('click', () => {
@@ -196,7 +179,6 @@
     });
   }
 
-  // Delegated file navigation click handler
   document.body.addEventListener('click', (e) => {
     const target = e.target.closest('.file-link');
     if (!target) return;
@@ -217,8 +199,6 @@
       column: column && !isNaN(column) ? column : undefined,
     });
   });
-
-  // --- Rendering Functions ---
 
   function setStatus(status, score) {
     statusBadge.textContent = status;
@@ -290,7 +270,6 @@
           : feat.status === 'partial' ? 'Partially Implemented'
           : feat.status === 'missing' ? 'Missing' : 'Unverified';
 
-        // Check for empty stubs warning
         const isStub = feat.status === 'partial' && (
           (feat.missing_details && feat.missing_details.toLowerCase().includes('stub')) ||
           (feat.evidence && feat.evidence.some(e => e.toLowerCase().includes('empty stub')))
@@ -343,7 +322,6 @@
       return;
     }
 
-    // Fallback to legacy feature_map
     if (legacyFeatureMap && legacyFeatureMap.length > 0) {
       legacyFeatureMap.forEach(item => {
         const card = document.createElement('div');
@@ -479,8 +457,6 @@
       : `Trajectory history: ${points.length} scan points`;
   }
 
-  // --- Message Listener from Extension Host ---
-
   window.addEventListener('message', (event) => {
     try {
       const message = event.data;
@@ -545,50 +521,40 @@
           const result = payload?.result;
           if (!result) return;
 
-          // Cache current project metadata
           currentRootPath = payload.rootPath || '';
           currentGoal = payload.goal || '';
           currentDescription = payload.description || '';
 
-          // Overview Header
           const rootBaseName = currentRootPath ? currentRootPath.split(/[\\/]/).filter(Boolean).pop() : 'Active Workspace';
           projectPathTitle.textContent = rootBaseName;
           projectPath.textContent = currentRootPath || 'No workspace root';
           projectGoalText.textContent = currentGoal || 'No goal stated.';
           projectDescText.textContent = currentDescription || 'No architecture details specified.';
 
-          // Category Badges & Chips
           const categories = result.project_categories || (result.dominant_category ? [result.dominant_category] : ['Generic Application']);
           categoryBadge.textContent = `Category: ${result.dominant_category || categories[0] || 'Generic'}`;
           categoryChips.innerHTML = categories.map(c => `<span class="chip">${escapeHtml(c)}</span>`).join('');
           lastUpdated.textContent = `Last scanned: ${new Date().toLocaleTimeString()}`;
 
-          // File count & domain summary
           fileCountValue.textContent = String(result.file_count || 0);
           domainSummary.textContent = `${categories.join(' • ')} (${result.file_count || 0} eligible files evaluated)`;
 
-          // Hero Scores
           setStatus(result.status, result.score);
           confidenceValue.textContent = `${Math.round((result.confidence || 0) * 100)}%`;
           readinessValue.textContent = result.readiness?.level || 'Low';
           coverageValue.textContent = `${Math.round((result.coverage_score || 0) * 100)}%`;
           completionValue.textContent = `${Math.round((result.completion_score || 0) * 100)}%`;
 
-          // Score Breakdown
           setScoreBreakdown(result.score_breakdown, result.coverage_score, result.completion_score);
 
-          // Mentor Brief & Project Summary
           mentorBrief.textContent = result.mentor_brief || result.reason;
           projectSummary.textContent = result.project_summary || '';
 
-          // Dynamic Requirements
           renderDynamicFeatures(result.features, result.feature_map);
 
-          // Diagnostics & Risk
           renderDiagnostics(result.diagnostics);
           renderRiskFindings(result.risk_findings, result.risk_level, result.risk);
 
-          // Error + Fix
           errorIssue.textContent = result.error_fix?.issue || 'No critical issue detected.';
           if (result.error_fix?.file) {
             const locLine = result.error_fix.line || '1';
@@ -599,7 +565,6 @@
           errorBadCode.textContent = result.error_fix?.bad_code || 'No problem code found.';
           errorFix.textContent = result.error_fix?.fixed_code || result.error_fix?.fix || 'No fix available.';
 
-          // Why & Next Steps
           whyDrift.textContent = result.why || result.reason;
           primarySuggestion.textContent = result.suggestion || 'No suggestion yet.';
           suggestionList.innerHTML = '';
@@ -609,7 +574,6 @@
             suggestionList.appendChild(li);
           });
 
-          // Area & Architecture
           setArea(result.area);
           architectureType.textContent = result.architecture?.type || 'Architecture summary unavailable.';
           architectureDetails.innerHTML = `
@@ -618,7 +582,6 @@
             <li>Primary Files: ${escapeHtml((result.architecture?.primary_files || []).join(', ') || 'Unknown')}</li>
           `;
 
-          // Readiness Signals & Strengths
           readinessSummary.textContent = result.readiness?.summary || 'No readiness data yet.';
           readinessSignals.innerHTML = '';
           (result.readiness?.signals || []).forEach(sig => {
@@ -634,7 +597,6 @@
             strengthsList.appendChild(li);
           });
 
-          // Interactive Top Matches
           renderInteractiveList(topMatches, result.top_matches, item => {
             return `
               <button class="file-link" data-path="${escapeHtml(item.path)}">📄 ${escapeHtml(item.path)}</button>
@@ -642,7 +604,6 @@
             `;
           });
 
-          // Missing Terms Chips
           missingTerms.innerHTML = '';
           if (!result.missing_terms || !result.missing_terms.length) {
             missingTerms.innerHTML = '<li class="muted">All identified goal concepts appear in source code.</li>';
@@ -655,7 +616,6 @@
             });
           }
 
-          // Interactive File Reviews
           renderInteractiveList(fileReviews, result.file_reviews, rev => {
             const badgeClass = rev.alignment === 'High' ? 'badge-success' : rev.alignment === 'Medium' ? 'badge-warning' : 'badge-danger';
             return `
@@ -667,7 +627,6 @@
             `;
           });
 
-          // Trend Chart
           drawTrend(result.graph || []);
           break;
         }
@@ -688,6 +647,5 @@
     }
   });
 
-  // Signal ready to extension host
   vscode.postMessage({ type: 'ready' });
 })();

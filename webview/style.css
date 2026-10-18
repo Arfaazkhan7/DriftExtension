@@ -1,10 +1,5 @@
-/* ==========================================================================
-   Drift AI Extension — Theme-Aligned Design System
-   Adapts natively to VS Code Light, Dark, and High-Contrast themes.
-   ========================================================================== */
 
 :root {
-  /* VS Code Theme Variable References with curated fallbacks */
   --bg: var(--vscode-editor-background, #1e1e1e);
   --fg: var(--vscode-editor-foreground, #d4d4d4);
   --panel: var(--vscode-sideBar-background, #252526);
@@ -13,7 +8,6 @@
   --muted: var(--vscode-descriptionForeground, #8c8c8c);
   --focus-ring: var(--vscode-focusBorder, #007acc);
 
-  /* Button Variables */
   --btn-bg: var(--vscode-button-background, #0e639c);
   --btn-fg: var(--vscode-button-foreground, #ffffff);
   --btn-hover: var(--vscode-button-hoverBackground, #1177bb);
@@ -21,12 +15,10 @@
   --btn-sec-fg: var(--vscode-button-secondaryForeground, #ffffff);
   --btn-sec-hover: var(--vscode-button-secondaryHoverBackground, #45494e);
 
-  /* Input Variables */
   --input-bg: var(--vscode-input-background, #3c3c3c);
   --input-fg: var(--vscode-input-foreground, #cccccc);
   --input-border: var(--vscode-input-border, #3c3c3c);
 
-  /* Semantic Drift Status Colors */
   --color-green: #38b286;
   --color-green-bg: rgba(56, 178, 134, 0.15);
   --color-yellow: #e5a93c;
@@ -37,7 +29,6 @@
   --color-blue-bg: rgba(74, 158, 255, 0.15);
 }
 
-/* Base Layout & Typography */
 * {
   box-sizing: border-box;
 }
@@ -54,7 +45,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Reduced Motion Preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -64,7 +54,6 @@ body {
   }
 }
 
-/* Focus Indicators for Accessible Keyboard Navigation */
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
@@ -73,7 +62,6 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
-/* Shell & Spacing */
 .shell {
   max-width: 1400px;
   margin: 0 auto;
@@ -83,7 +71,6 @@ textarea:focus-visible,
   gap: 20px;
 }
 
-/* Toolbar Header */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -125,7 +112,6 @@ textarea:focus-visible,
   flex-wrap: wrap;
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -167,7 +153,6 @@ textarea:focus-visible,
   background-color: var(--panel-alt);
 }
 
-/* Banners */
 .banner-container {
   display: flex;
   flex-direction: column;
@@ -224,7 +209,6 @@ textarea:focus-visible,
   to { transform: rotate(360deg); }
 }
 
-/* Panels */
 .panel {
   background-color: var(--panel);
   border: 1px solid var(--border);
@@ -249,7 +233,6 @@ textarea:focus-visible,
   font-weight: 600;
 }
 
-/* Project Overview */
 .project-overview {
   gap: 14px;
 }
@@ -328,7 +311,6 @@ textarea:focus-visible,
   opacity: 0.5;
 }
 
-/* Hero Section */
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -426,7 +408,6 @@ textarea:focus-visible,
   margin-bottom: 2px;
 }
 
-/* Score Breakdown Card */
 .score-breakdown-card {
   gap: 12px;
 }
@@ -469,7 +450,6 @@ textarea:focus-visible,
 .bar-fill.backend { background-color: var(--color-blue); }
 .bar-fill.logic { background-color: var(--color-green); }
 
-/* Status Badges */
 .status, .risk, .badge {
   display: inline-flex;
   align-items: center;
@@ -506,7 +486,6 @@ textarea:focus-visible,
   border: 1px solid var(--border);
 }
 
-/* Dynamic Requirements Feature Cards Grid */
 .feature-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -609,7 +588,6 @@ textarea:focus-visible,
   border-top: 1px dashed var(--border);
 }
 
-/* Diagnostics & Code Items */
 .diagnostics-list, .risk-findings-list {
   display: flex;
   flex-direction: column;
@@ -659,7 +637,6 @@ textarea:focus-visible,
   overflow-y: auto;
 }
 
-/* Grids & Lists */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -715,7 +692,6 @@ textarea:focus-visible,
   color: var(--color-yellow);
 }
 
-/* Area Analysis Bars */
 .bars {
   display: flex;
   flex-direction: column;
@@ -730,7 +706,6 @@ textarea:focus-visible,
   font-size: 12px;
 }
 
-/* Trend SVG */
 .trend-chart {
   width: 100%;
   height: 220px;
@@ -762,7 +737,6 @@ textarea:focus-visible,
   stroke-width: 2;
 }
 
-/* Modal Dialog */
 .modal-dialog {
   padding: 0;
   border: 1px solid var(--border);
@@ -839,7 +813,6 @@ textarea:focus-visible,
   padding-top: 8px;
 }
 
-/* Typography Utilities */
 .body-copy {
   margin: 0;
   line-height: 1.5;
@@ -858,7 +831,6 @@ textarea:focus-visible,
   font-size: 11px;
 }
 
-/* High Contrast Adjustments */
 body.vscode-high-contrast .panel,
 body.vscode-high-contrast .goal-box,
 body.vscode-high-contrast .feature-card,
@@ -870,7 +842,6 @@ body.vscode-high-contrast .btn {
   border: 1px solid var(--vscode-focusBorder, #f38518);
 }
 
-/* Responsive Breakpoints */
 @media (max-width: 1024px) {
   .hero-grid {
     grid-template-columns: 1fr;

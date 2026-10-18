@@ -24,7 +24,6 @@ COMMON_REQUIREMENT_CONCEPTS: Dict[str, Set[str]] = {
     "transcription": {"transcribe", "speech", "audio", "whisper", "recognize", "voice", "text"},
 }
 
-
 def extract_goal_requirements(goal: str, description: str) -> List[str]:
     raw_text = f"{goal}\n{description}".strip()
     clauses: List[str] = []
@@ -49,13 +48,7 @@ def extract_goal_requirements(goal: str, description: str) -> List[str]:
 
     return clauses[:8]
 
-
 def check_is_stub(file: ExtractedFile, symbol_name: str) -> bool:
-    """
-    Detect whether a function or class definition is merely an empty stub
-    (e.g. pass, raise NotImplementedError, return null, empty body).
-    Uses Python AST when available for 100% deterministic accuracy.
-    """
     if file.language == "py":
         try:
             tree = ast.parse(file.content)
@@ -65,7 +58,6 @@ def check_is_stub(file: ExtractedFile, symbol_name: str) -> bool:
                     if not body:
                         return True
                     filtered = body
-                    # Skip docstring expression
                     if len(body) >= 1 and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and isinstance(body[0].value.value, str):
                         filtered = body[1:]
                     if not filtered:
@@ -88,7 +80,6 @@ def check_is_stub(file: ExtractedFile, symbol_name: str) -> bool:
         except SyntaxError:
             pass
 
-    # Regex fallback for JS/TS/others
     pattern = re.compile(
         rf"(?:def|function|class)\s+{re.escape(symbol_name)}\b[^{{:]*[:\{{]([\s\S]{{1,350}}?)(?=\n\s*(?:def|function|class|\Z)|\}})",
         re.MULTILINE,
@@ -108,7 +99,6 @@ def check_is_stub(file: ExtractedFile, symbol_name: str) -> bool:
             return True
     return False
 
-
 def detect_dynamic_features(
     requirements: List[str],
     files: List[ExtractedFile],
@@ -121,7 +111,6 @@ def detect_dynamic_features(
         if not req_tokens:
             continue
 
-        # Expand with general technical concepts
         expanded_req_tokens = set(req_tokens)
         for t in req_tokens:
             if t in COMMON_REQUIREMENT_CONCEPTS:
@@ -140,12 +129,10 @@ def detect_dynamic_features(
             path_tokens = set(tokenize(file.path))
             file_matched = False
 
-            # Check path matching
             if expanded_req_tokens & path_tokens:
                 file_matched = True
                 evidence_items.append(f"file:{file.path}")
 
-            # Check symbols (functions, classes, variables)
             for sym in file.symbols:
                 sym_tokens = set(tokenize(sym))
                 if len(expanded_req_tokens & sym_tokens) >= 1:
@@ -163,14 +150,12 @@ def detect_dynamic_features(
                             matching_lines.append(line_no)
                             break
 
-            # Check keywords / concepts
             for kw in file.keywords:
                 kw_tokens = set(tokenize(kw))
                 if expanded_req_tokens & kw_tokens:
                     file_matched = True
                     evidence_items.append(f"concept:{kw}")
 
-            # Check imports matching requirement
             for imp in file.imports:
                 imp_tokens = set(tokenize(imp))
                 if expanded_req_tokens & imp_tokens:
@@ -178,7 +163,6 @@ def detect_dynamic_features(
                     has_substantive_code = True
                     evidence_items.append(f"import:{imp}")
 
-            # Check routes
             for route in file.routes:
                 route_tokens = set(tokenize(route))
                 if expanded_req_tokens & route_tokens:
@@ -191,7 +175,6 @@ def detect_dynamic_features(
 
         unique_evidence = list(dict.fromkeys(evidence_items))
 
-        # Status evaluation: stubs alone cannot qualify as implemented!
         if has_substantive_code and len(unique_evidence) >= 2 and stub_count == 0:
             status = "implemented"
             confidence = 0.85

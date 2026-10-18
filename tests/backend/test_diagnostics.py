@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "backend"))
 from extractor import ExtractedFile
 from services.diagnostics import detect_code_diagnostics
 
-
 class TestDiagnostics(unittest.TestCase):
     def test_multi_file_syntax_errors(self):
         files = [
@@ -60,7 +59,6 @@ class TestDiagnostics(unittest.TestCase):
         self.assertIn("broken_two.py", err_files)
         self.assertNotIn("clean_file.py", err_files)
         self.assertEqual(primary["file"], "broken_one.py")
-
 
 if __name__ == "__main__":
     unittest.main()

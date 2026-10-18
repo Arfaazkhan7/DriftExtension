@@ -22,12 +22,7 @@ LOGIC_KEYWORDS = {
     "pyautogui", "pynput", "ctypes", "win32api", "opencv", "cv2", "mediapipe",
 }
 
-
 def analyze_areas(files: List[ExtractedFile]) -> Dict[str, object]:
-    """
-    Classify codebase distribution across UI, Backend, and Logic surfaces.
-    Accurately avoids misclassifying OS automation or coordinate math as UI.
-    """
     ui_weight = 0.0
     backend_weight = 0.0
     logic_weight = 0.0
@@ -43,24 +38,19 @@ def analyze_areas(files: List[ExtractedFile]) -> Dict[str, object]:
         f_backend = 0.0
         f_logic = 0.0
 
-        # UI evidence
         if lang in {"html", "css", "scss", "jsx", "tsx", "vue", "svelte"}:
             f_ui += 3.0
         f_ui += sum(1.5 for token in UI_FRAMEWORKS if token in semantic_tokens or token in path_lower)
 
-        # Backend evidence
         if any(term in path_lower for term in ("api", "server", "backend", "routes", "controllers", "models", "db")):
             f_backend += 2.5
         f_backend += sum(1.5 for token in BACKEND_FRAMEWORKS if token in semantic_tokens or token in path_lower)
 
-        # Logic evidence
         if any(term in path_lower for term in ("core", "engine", "service", "logic", "utils", "lib", "algo")):
             f_logic += 2.0
         f_logic += sum(1.5 for token in LOGIC_KEYWORDS if token in semantic_tokens or token in path_lower)
 
-        # Disambiguate: automation coordinates (e.g. screen width, cursor position) are Logic
         if any(tok in semantic_tokens for tok in ("pyautogui", "pynput", "ctypes", "win32api", "coordinate", "cursor")):
-            # If no real frontend markup or UI framework is present, suppress false UI classification
             if lang not in {"html", "css", "jsx", "tsx", "vue", "svelte"} and not any(fw in semantic_tokens for fw in ("react", "vue", "tkinter", "pygame", "pyqt5")):
                 f_logic += f_ui * 0.8
                 f_ui *= 0.2
@@ -83,7 +73,6 @@ def analyze_areas(files: List[ExtractedFile]) -> Dict[str, object]:
         backend_weight += p_backend
         logic_weight += p_logic
 
-        # Dominant area for this specific file
         if p_ui >= p_backend and p_ui >= p_logic:
             dominant = "UI"
         elif p_backend >= p_logic:

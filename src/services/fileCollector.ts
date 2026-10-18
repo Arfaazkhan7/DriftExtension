@@ -27,10 +27,6 @@ export class FileCollector {
     this.customIgnoreExts = options?.customIgnoreExts;
   }
 
-  /**
-   * Recursively collect valid source files in the project directory,
-   * enforcing boundaries, ignoring exclusions and secrets, and honoring file size and count limits.
-   */
   public async collectFiles(projectRoot: string): Promise<string[]> {
     const resolvedRoot = path.resolve(projectRoot);
     const results: string[] = [];
@@ -41,12 +37,10 @@ export class FileCollector {
         return;
       }
 
-      // Check boundary
       if (!isPathInsideDirectory(currentDir, resolvedRoot) && currentDir !== resolvedRoot) {
         return;
       }
 
-      // Resolve real path to detect circular symlinks
       let realDirPath: string;
       try {
         realDirPath = await fsp.realpath(currentDir);
@@ -75,12 +69,10 @@ export class FileCollector {
 
         if (entry.isDirectory()) {
           if (!shouldIgnoreDirectory(entry.name, this.customIgnoreDirs)) {
-            // Check if directory is a virtual environment via pyvenv.cfg
             try {
               await fsp.access(path.join(fullPath, 'pyvenv.cfg'));
               continue; // Skip virtual environment directory
             } catch {
-              // Not a venv directory
             }
             await walk(fullPath);
           }
@@ -96,7 +88,6 @@ export class FileCollector {
                   await fsp.access(path.join(fullPath, 'pyvenv.cfg'));
                   continue;
                 } catch {
-                  // Not a venv directory
                 }
                 await walk(fullPath);
               }
@@ -111,14 +102,12 @@ export class FileCollector {
           continue;
         }
 
-        // Verify file size before including
         try {
           const stat = await fsp.stat(fullPath);
           if (stat.size <= this.maxFileSizeBytes) {
             results.push(fullPath);
           }
         } catch {
-          // Unreadable file, skip
         }
       }
     };

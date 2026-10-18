@@ -37,7 +37,6 @@ export class DriftController implements CommandControllerDelegate, WebviewPanelD
       { debounceMs: 400 }
     );
 
-    // Restore UI if a session was previously stored
     const existingSession = this.sessionManager.getSession();
     if (existingSession?.lastResult) {
       this.statusBar.text = `$(pulse) Drift AI: ${existingSession.lastResult.status} ${Math.round(existingSession.lastResult.score * 100)}%`;
@@ -184,7 +183,6 @@ export class DriftController implements CommandControllerDelegate, WebviewPanelD
       return;
     }
 
-    // Check if the saved file is strictly within the active project root
     if (!isPathInsideDirectory(document.uri.fsPath, session.rootPath)) {
       return;
     }
@@ -232,7 +230,6 @@ export class DriftController implements CommandControllerDelegate, WebviewPanelD
 
       const filePaths = await this.fileCollector.collectFiles(session.rootPath);
 
-      // Verify that this run has not been superseded by a newer request
       if (runId !== this.analysisQueue.activeRunId) {
         return;
       }
@@ -259,7 +256,6 @@ export class DriftController implements CommandControllerDelegate, WebviewPanelD
         cwd: session.rootPath,
       });
 
-      // Verify again that this run was not superseded while waiting for the backend
       if (runId !== this.analysisQueue.activeRunId) {
         return;
       }

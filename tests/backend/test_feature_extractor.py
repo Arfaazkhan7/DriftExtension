@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "backend"))
 from extractor import ExtractedFile
 from services.feature_extractor import extract_goal_requirements, detect_dynamic_features, check_is_stub
 
-
 class TestFeatureExtractor(unittest.TestCase):
     def test_extract_goal_requirements(self):
         goal = "Develop a meeting application with video calling, user authentication, meeting recording, speech transcription, and meeting history."
@@ -81,7 +80,6 @@ def login(username, password):
 
         self.assertEqual(auth_feature["status"], "implemented")
         self.assertEqual(video_feature["status"], "missing")
-
 
 if __name__ == "__main__":
     unittest.main()

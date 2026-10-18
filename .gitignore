@@ -1,11 +1,9 @@
-# Node & Build Outputs
 node_modules/
 out/
 out-test/
 dist/
 *.vsix
 
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -30,14 +28,12 @@ wheels/
 .installed.cfg
 *.egg
 
-# Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
 coverage/
 .nyc_output/
 
-# Logs & Temporary Files
 *.log
 debug.log
 npm-debug.log*
@@ -46,14 +42,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# IDE & Editor
 .vscode-test/
 .idea/
 .vs/
 *.swp
 *.swo
 
-# Secrets & Environment Variables
 .env
 .env.*
 *.pem

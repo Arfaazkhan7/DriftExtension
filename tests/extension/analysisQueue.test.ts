@@ -16,7 +16,6 @@ describe('AnalysisQueue', () => {
     queue.requestRun('Save 2');
     queue.requestRun('Save 3');
 
-    // Wait past debounce
     await new Promise(resolve => setTimeout(resolve, 100));
 
     assert.strictEqual(callCount, 1, 'Multiple rapid saves should coalesce into a single run');
@@ -31,7 +30,6 @@ describe('AnalysisQueue', () => {
       async (runId, reason) => {
         executedRuns.push({ runId, reason });
         if (executedRuns.length === 1) {
-          // Keep first run active until we trigger the save during execution
           await new Promise<void>(resolve => {
             resolveActiveRun = resolve;
           });
@@ -40,24 +38,19 @@ describe('AnalysisQueue', () => {
       { debounceMs: 20 }
     );
 
-    // Start first run asynchronously
     const firstRunPromise = queue.forceRun('First Manual Trigger');
 
-    // Wait until runner has started
     while (executedRuns.length === 0) {
       await new Promise(resolve => setTimeout(resolve, 5));
     }
     assert.strictEqual(queue.running, true, 'Queue should be marked running');
 
-    // Trigger save while first run is in-flight
     queue.requestRun('Save during active run');
     await new Promise(resolve => setTimeout(resolve, 30));
 
-    // Finish first run
     resolveActiveRun!();
     await firstRunPromise;
 
-    // Allow trailing run to dispatch and finish
     await new Promise(resolve => setTimeout(resolve, 60));
 
     assert.strictEqual(executedRuns.length, 2, 'Trailing run should execute after active run completes');
@@ -101,12 +94,10 @@ describe('AnalysisQueue', () => {
     try {
       await queue.forceRun('Failing Run');
     } catch {
-      // Expected
     }
 
     assert.strictEqual(queue.running, false, 'Queue must not be stuck in running state after error');
 
-    // Should succeed on next run
     await queue.forceRun('Recovered Run');
     assert.strictEqual(attempts, 2);
     assert.strictEqual(queue.running, false);

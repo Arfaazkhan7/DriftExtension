@@ -125,7 +125,6 @@ export type ExtensionToWebviewMessage =
   | { type: 'goalUpdated'; goal: string; description: string }
   | { type: 'diagnosticsUpdated'; diagnostics: CodeDiagnostic[] }
   | { type: 'themeChanged'; kind: ThemeKind }
-  // Backward compatibility
   | { type: 'analysis:update'; payload: WebviewPayload }
   | { type: 'analysis:status'; payload: { status: 'idle' | 'analyzing' | 'error'; message?: string } };
 
@@ -139,7 +138,6 @@ export type WebviewToExtensionMessage =
   | { type: 'openFile'; path: string; line?: number }
   | { type: 'openLocation'; path: string; line?: number; column?: number }
   | { type: 'refreshDashboard' }
-  // Backward compatibility
   | { type: 'action:openFile'; path: string; line?: number }
   | { type: 'action:triggerAnalysis' }
   | { type: 'action:editGoal' };

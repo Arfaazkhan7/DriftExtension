@@ -8,28 +8,20 @@ export class BackendProcessService {
   private activeProcess: ChildProcess | undefined;
   private activeTempDir: string | undefined;
 
-  /**
-   * Run the Python backend with the given payload, enforcing strict timeouts,
-   * direct process execution (no shell), secure temp file isolation, and automatic cleanup.
-   */
   public async execute(payload: AnalysisPayload, options: BackendProcessOptions): Promise<DriftResult> {
-    // 1. Create a secure, uniquely named temporary directory
     const tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'drift-run-'));
     this.activeTempDir = tempDir;
     const payloadFile = path.join(tempDir, 'payload.json');
 
     try {
-      // 2. Write payload to temporary file with restrictive permissions (0o600)
       await fsp.writeFile(payloadFile, JSON.stringify(payload), {
         encoding: 'utf8',
         mode: 0o600,
       });
 
-      // 3. Spawn Python process directly with arguments array (no shell: true)
       const args = [options.backendScriptPath, '--payload', payloadFile];
       const output = await this.spawnWithTimeout(options.pythonPath, args, options.cwd, options.timeoutMs);
 
-      // 4. Parse and validate JSON response
       let parsed: unknown;
       try {
         parsed = JSON.parse(output);
@@ -43,7 +35,6 @@ export class BackendProcessService {
 
       return parsed as DriftResult;
     } finally {
-      // 5. Always clean up temporary files and folder
       await fsp.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
       if (this.activeTempDir === tempDir) {
         this.activeTempDir = undefined;
@@ -51,22 +42,15 @@ export class BackendProcessService {
     }
   }
 
-  /**
-   * Cancel the currently executing backend process, if any.
-   */
   public cancel(): void {
     if (this.activeProcess && !this.activeProcess.killed) {
       try {
         this.activeProcess.kill('SIGTERM');
       } catch {
-        // Process might already be dead
       }
     }
   }
 
-  /**
-   * Clean up all resources upon extension deactivation.
-   */
   public dispose(): void {
     this.cancel();
     if (this.activeTempDir) {
@@ -85,7 +69,6 @@ export class BackendProcessService {
       let isSettled = false;
       let timer: NodeJS.Timeout | undefined;
 
-      // Direct spawn without shell
       const child = spawn(command, args, {
         cwd,
         windowsHide: true,
@@ -120,16 +103,13 @@ export class BackendProcessService {
           cleanup();
           try {
             child.kill('SIGTERM');
-            // Hard kill after 1 second if still alive
             setTimeout(() => {
               try {
                 child.kill('SIGKILL');
               } catch {
-                // Ignore
               }
             }, 1000).unref();
           } catch {
-            // Ignore
           }
           reject(new Error(`Backend analysis timed out after ${Math.round(timeoutMs / 1000)} seconds.`));
         }

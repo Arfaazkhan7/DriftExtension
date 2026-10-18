@@ -17,7 +17,6 @@ describe('BackendProcessService', () => {
       filePaths: [],
     };
 
-    // Point to non-existent backend to force failure
     const fakeScript = path.join(process.cwd(), 'non-existent-script.py');
 
     let thrown = false;
@@ -34,10 +33,8 @@ describe('BackendProcessService', () => {
 
     assert.strictEqual(thrown, true, 'Execution should throw on missing script');
 
-    // Verify temp directory was cleaned up
     const tempEntries = await fsp.readdir(os.tmpdir());
     const leftoverDirs = tempEntries.filter(name => name.startsWith('drift-run-'));
-    // None of the leftover dirs should be active
     assert.strictEqual(service['activeTempDir'], undefined, 'activeTempDir must be reset to undefined');
   });
 
@@ -46,7 +43,6 @@ describe('BackendProcessService', () => {
     const tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'drift-test-timeout-'));
     const hangingScript = path.join(tempDir, 'hang.py');
 
-    // Create a python script that hangs for 10 seconds
     await fsp.writeFile(hangingScript, 'import time; time.sleep(10)');
 
     const payload: AnalysisPayload = {

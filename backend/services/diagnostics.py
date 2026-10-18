@@ -8,14 +8,7 @@ from extractor import ExtractedFile
 
 ASSIGNMENT_IN_CONDITION = re.compile(r"\b(if|while)\s*\([^)]*[^=!<>]=[^=].*\)")
 
-
 def detect_code_diagnostics(files: List[ExtractedFile]) -> Tuple[List[Dict[str, object]], Dict[str, str]]:
-    """
-    Detect syntax errors and code warnings across all files without terminating early.
-    Returns:
-    - diagnostics: Full list of file-level issues with lines and severity
-    - primary_error_fix: Backward-compatible object for panel.js
-    """
     diagnostics: List[Dict[str, object]] = []
 
     for file in files:
@@ -54,7 +47,6 @@ def detect_code_diagnostics(files: List[ExtractedFile]) -> Tuple[List[Dict[str, 
                     })
                     break  # report one per file to avoid noise
 
-    # Backward-compatible error_fix object for panel.js
     if diagnostics:
         primary = diagnostics[0]
         primary_error_fix = {
@@ -76,7 +68,6 @@ def detect_code_diagnostics(files: List[ExtractedFile]) -> Tuple[List[Dict[str, 
         }
 
     return diagnostics, primary_error_fix
-
 
 def build_python_suggestion(error_msg: str, snippet: str) -> str:
     msg = error_msg.lower()

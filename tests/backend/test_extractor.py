@@ -8,7 +8,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "backend"))
 
 from extractor import ProjectExtractor, extract_python_semantics
 
-
 class TestExtractor(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -28,7 +27,7 @@ class TestExtractor(unittest.TestCase):
         (self.root / "app.py").write_text("print('app')", encoding="utf-8")
         (self.root / "secret.key").write_text("PRIVATE KEY", encoding="utf-8")
         (self.root / "image.png").write_text("IMAGE", encoding="utf-8")
-        
+
         git_dir = self.root / ".git"
         git_dir.mkdir()
         (git_dir / "HEAD").write_text("ref", encoding="utf-8")
@@ -62,7 +61,6 @@ class Calculator:
         self.assertIn("add", semantic_names)
         self.assertIn("result", semantic_names)
         self.assertTrue(any("simple math calculator" in doc for doc in doc_parts))
-
 
 if __name__ == "__main__":
     unittest.main()

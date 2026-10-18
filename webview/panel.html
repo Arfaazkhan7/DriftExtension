@@ -9,7 +9,6 @@
 </head>
 <body>
   <div class="shell">
-    <!-- Top Action & Navigation Toolbar -->
     <header class="toolbar">
       <div class="brand">
         <span class="brand-icon">⚡</span>
@@ -34,7 +33,6 @@
       </div>
     </header>
 
-    <!-- State & Alert Banners -->
     <div id="bannerContainer" class="banner-container" aria-live="polite">
       <div id="analyzingBanner" class="banner banner-info" style="display: none;">
         <span class="spinner"></span>
@@ -51,7 +49,6 @@
       </div>
     </div>
 
-    <!-- Section A: Project Overview -->
     <section class="panel project-overview">
       <div class="overview-header">
         <div>
@@ -80,7 +77,6 @@
       </div>
     </section>
 
-    <!-- Section B: Alignment Metrics Hero -->
     <section class="hero-grid">
       <div class="panel hero-card">
         <div class="hero-header">
@@ -170,14 +166,12 @@
       </div>
     </section>
 
-    <!-- Mentor Brief & Summary -->
     <section class="panel brief-panel">
       <h3>AI Mentor Brief</h3>
       <p id="mentorBrief" class="body-copy">Run an analysis to generate your customized architectural mentor brief.</p>
       <p id="projectSummary" class="body-copy muted"></p>
     </section>
 
-    <!-- Section C: Requirement Coverage (Dynamic Features v2.0.0) -->
     <section class="panel">
       <div class="panel-title-row">
         <h2>Derived Requirements & Feature Verification</h2>
@@ -188,9 +182,7 @@
       </div>
     </section>
 
-    <!-- Section D: Drift Findings & Code Diagnostics -->
     <section class="metrics-grid">
-      <!-- Diagnostics Panel -->
       <article class="panel">
         <div class="panel-title-row">
           <h2>Code Diagnostics</h2>
@@ -202,7 +194,6 @@
         </div>
       </article>
 
-      <!-- Risk Findings Panel -->
       <article class="panel">
         <div class="panel-title-row">
           <h2>Risk Analysis</h2>
@@ -212,7 +203,6 @@
         <div id="riskFindingsList" class="risk-findings-list"></div>
       </article>
 
-      <!-- Error & Fix Panel -->
       <article class="panel">
         <h2>Error + Fix Solution</h2>
         <p id="errorIssue" class="body-copy">No critical syntax issue detected.</p>
@@ -224,7 +214,6 @@
       </article>
     </section>
 
-    <!-- Action Plan & Architecture -->
     <section class="metrics-grid">
       <article class="panel">
         <h2>Why It Is Drifting</h2>
@@ -266,7 +255,6 @@
       </article>
     </section>
 
-    <!-- Strongest Matching & Missing Terms -->
     <section class="overview-grid">
       <article class="panel">
         <h2>Strongest Matching Files</h2>
@@ -281,14 +269,12 @@
       </article>
     </section>
 
-    <!-- File Reviews Section -->
     <section class="panel">
       <h2>File-by-File Alignment Review</h2>
       <p class="body-copy text-small">Click any file to jump to its implementation:</p>
       <ul id="fileReviews" class="list interactive-list"></ul>
     </section>
 
-    <!-- Live Drift Trend Chart -->
     <section class="panel">
       <div class="panel-title-row">
         <h2>Live Drift Trend History</h2>
@@ -310,7 +296,6 @@
 
   </div>
 
-  <!-- Accessible Modal Dialog for Editing Project Goal -->
   <dialog id="goalModal" class="modal-dialog" aria-labelledby="modalTitle">
     <form id="goalForm" method="dialog" class="modal-card">
       <div class="modal-header">

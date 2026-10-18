@@ -11,7 +11,6 @@ from utils.exclusions import (
     CANONICAL_IGNORE_EXTENSIONS,
 )
 
-
 class TestExclusions(unittest.TestCase):
     def test_canonical_directories(self):
         self.assertTrue(should_ignore_directory(".git"))
@@ -41,7 +40,6 @@ class TestExclusions(unittest.TestCase):
         self.assertTrue(should_ignore_file(Path("credentials.json")))
         self.assertTrue(should_ignore_file(Path("secrets.json")))
         self.assertFalse(should_ignore_file(Path("config.json")))
-
 
 if __name__ == "__main__":
     unittest.main()

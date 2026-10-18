@@ -119,7 +119,6 @@ describe('Webview Two-Way Messaging & Security', () => {
       history: [],
     };
 
-    // Valid goal update
     await panel.handleWebviewMessage({
       type: 'updateGoal',
       goal: 'New Project Goal',
@@ -130,7 +129,6 @@ describe('Webview Two-Way Messaging & Security', () => {
     assert.strictEqual(delegateCalls.updatedGoals[0].goal, 'New Project Goal');
     assert.strictEqual(delegateCalls.updatedGoals[0].desc, 'New Description');
 
-    // Empty goal should trigger warning and not update
     await panel.handleWebviewMessage({
       type: 'updateGoal',
       goal: '   ',
@@ -149,7 +147,6 @@ describe('Webview Two-Way Messaging & Security', () => {
       history: [],
     };
 
-    // Open relative path inside workspace
     await panel.handleWebviewMessage({
       type: 'openLocation',
       path: path.join('src', 'main.py'),
@@ -170,7 +167,6 @@ describe('Webview Two-Way Messaging & Security', () => {
       history: [],
     };
 
-    // Attempt to access parent directory outside workspace
     await panel.handleWebviewMessage({
       type: 'openFile',
       path: '../../../../etc/passwd',
@@ -204,7 +200,6 @@ describe('Webview Two-Way Messaging & Security', () => {
     assert.strictEqual(mockState.createdPanels.length, 1);
     const mockPanel = mockState.createdPanels[0];
 
-    // Verify initial ready handshake triggers theme notice
     mockState.activeThemeKind = 1; // Light
     if (mockState.themeChangeListeners.length > 0) {
       mockState.themeChangeListeners[0]();
@@ -213,14 +208,12 @@ describe('Webview Two-Way Messaging & Security', () => {
     const messages = mockPanel.webview._postedMessages;
     assert.ok(messages.some(m => m.type === 'themeChanged' && m.kind === 'light'));
 
-    // High contrast theme notice
     mockState.activeThemeKind = 3; // HighContrast
     if (mockState.themeChangeListeners.length > 0) {
       mockState.themeChangeListeners[0]();
     }
     assert.ok(messages.some(m => m.type === 'themeChanged' && m.kind === 'high-contrast'));
 
-    // Push update delivers both analysisCompleted and analysis:update
     const dummyResult: any = {
       status: 'Aligned',
       score: 0.85,

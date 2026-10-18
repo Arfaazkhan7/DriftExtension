@@ -21,7 +21,6 @@ from services.project_classifier import detect_project_categories
 from similarity import compare_goal_to_code, tokenize
 from suggestion import build_actionable_suggestions
 
-
 class DriftAnalyzer:
     def __init__(self, project_root: Path, config_path: Path) -> None:
         self.project_root = project_root
@@ -29,11 +28,9 @@ class DriftAnalyzer:
         self.extractor = ProjectExtractor(config_path)
 
     def analyze(self, goal: str, description: str, file_paths: List[str], history: List[float]) -> Dict[str, object]:
-        # 1. Extract workspace files
         files = self.extractor.extract_project(self.project_root, file_paths)
         combined_goal = f"{goal}\n{description}".strip()
 
-        # 2. Dynamic requirements & feature detection
         requirements = extract_goal_requirements(goal, description)
         enriched_features, legacy_feature_map = detect_dynamic_features(requirements, files)
 
@@ -43,14 +40,11 @@ class DriftAnalyzer:
             ((implemented_count * 1.0) + (partial_count * 0.5)) / max(1, len(enriched_features))
         ) if enriched_features else 0.0
 
-        # 3. Detect multi-file syntax diagnostics across all files
         diagnostics_list, primary_error_fix = detect_code_diagnostics(files)
 
-        # 4. Detect project categories (Web, API, Mobile, Desktop, Vision, etc.)
         category_data = detect_project_categories(files, self.project_root)
         dominant_category = str(category_data["dominant_category"])
 
-        # 5. Enrich semantic code documents with imported library concepts
         project_concepts, _known_libs = get_project_library_concepts(files)
         concept_str = " ".join(sorted(project_concepts))
         code_documents = [
@@ -59,20 +53,16 @@ class DriftAnalyzer:
         ]
         weights = [file.importance for file in files]
 
-        # 6. Lexical and similarity measurements
         similarity_score, per_file_scores, missing_terms, coverage_score = compare_goal_to_code(
             combined_goal, code_documents, weights
         )
 
-        # 7. Multi-signal domain intelligence
         import_alignment = compute_import_goal_alignment(files, combined_goal)
         identifier_score = score_identifier_goal_alignment(files, combined_goal)
         structural_richness = compute_structural_richness(files)
         areas = analyze_areas(files)
         completion_score, completion_notes = self.estimate_completion(files)
 
-        # 8. Documented, normalized multi-signal alignment calculation
-        # Weights: Goal Lexical (0.20) + Identifiers (0.20) + Imports (0.15) + Feature Coverage (0.25) + Structure (0.10) + Completion (0.10)
         raw_alignment = (
             (similarity_score * 0.20)
             + (identifier_score * 0.20)
@@ -82,13 +72,11 @@ class DriftAnalyzer:
             + (completion_score * 0.10)
         )
 
-        # Apply diagnostics adjustment if syntax errors exist
         if diagnostics_list:
             raw_alignment = max(0.10, raw_alignment - (0.05 * min(4, len(diagnostics_list))))
 
         alignment_score = round(min(1.0, max(0.0, raw_alignment)), 2)
 
-        # 9. Explainable drift classification (no project-specific overrides)
         status, drift_score, primary_reason, reason_list = calculate_drift_classification(
             alignment_score=alignment_score,
             feature_coverage=feature_coverage,
@@ -98,7 +86,6 @@ class DriftAnalyzer:
             config=self.config,
         )
 
-        # 10. Risk prediction (separating drift, code quality, and volatility)
         updated_history = (history + [alignment_score])[-20:]
         risk_data = predict_comprehensive_risk(
             status=status,
@@ -110,7 +97,6 @@ class DriftAnalyzer:
             area_distribution=areas["distribution"],
         )
 
-        # 11. Refine missing terms and generate suggestions
         missing_features = [f["name"] for f in enriched_features if f["status"] == "missing"]
         missing_terms = [t for t in missing_terms if t.lower() not in project_concepts][:5]
         suggestions = build_actionable_suggestions(
@@ -122,7 +108,6 @@ class DriftAnalyzer:
             dominant_category=dominant_category,
         )
 
-        # 12. Synthesize architecture and guidance artifacts
         architecture = self.summarize_architecture(files, areas["distribution"], dominant_category)
         top_matches = self.build_top_matches(files, per_file_scores)
         strengths = self.build_strengths(files, enriched_features, areas["distribution"], completion_notes)
@@ -135,7 +120,6 @@ class DriftAnalyzer:
         why_drift = self.build_why_drift(reason_list, missing_features, missing_terms, top_matches)
 
         return {
-            # Versioned Schema
             "schema_version": "2.0.0",
             "score": alignment_score,  # Primary alignment score (0.0 to 1.0)
             "alignment_score": alignment_score,

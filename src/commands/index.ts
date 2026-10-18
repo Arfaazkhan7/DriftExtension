@@ -15,7 +15,6 @@ export function registerCommands(
 ): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = [];
 
-  // 1. Start Analysis
   disposables.push(
     vscode.commands.registerCommand('driftDetection.startAnalysis', async (targetUri?: vscode.Uri) => {
       let rootUri = targetUri;
@@ -78,14 +77,12 @@ export function registerCommands(
     })
   );
 
-  // 2. Open Dashboard
   disposables.push(
     vscode.commands.registerCommand('driftDetection.openDashboard', () => {
       delegate.openDashboard();
     })
   );
 
-  // 3. Edit Goal
   disposables.push(
     vscode.commands.registerCommand('driftDetection.editGoal', async () => {
       if (!delegate.getActiveRootPath()) {
@@ -116,7 +113,6 @@ export function registerCommands(
     })
   );
 
-  // 4. Cancel Analysis
   disposables.push(
     vscode.commands.registerCommand('driftDetection.cancelAnalysis', () => {
       delegate.cancelAnalysis();

@@ -7,10 +7,8 @@ from pathlib import Path
 
 from analyzer import DriftAnalyzer
 
-
 def load_payload(payload_path: Path) -> dict:
     return json.loads(payload_path.read_text(encoding="utf-8"))
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Live Code Drift Detection AI backend")
@@ -32,7 +30,6 @@ def main() -> int:
 
     print(json.dumps(result))
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

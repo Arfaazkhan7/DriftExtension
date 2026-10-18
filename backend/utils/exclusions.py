@@ -32,7 +32,6 @@ SECRET_FILE_PATTERNS = [
     re.compile(r"^(credentials|secrets|tokens)\.json$", re.IGNORECASE),
 ]
 
-
 def should_ignore_file(file_path: Path, custom_extensions: Set[str] | None = None) -> bool:
     name = file_path.name
     ext = file_path.suffix.lower()
@@ -48,12 +47,10 @@ def should_ignore_file(file_path: Path, custom_extensions: Set[str] | None = Non
 
     return False
 
-
 VENV_NAME_PATTERN = re.compile(
     r"^(.*[._-])?(venv|virtualenv|conda)([0-9._-].*)?$|^(.*[._-])?env([0-9._-].*)?$|^myenv$|^pyenv$|^venv$|^env$|^\.venv$|^\.env$|^site-packages$",
     re.IGNORECASE,
 )
-
 
 def should_ignore_directory(dir_name: str, custom_dirs: Set[str] | None = None) -> bool:
     if dir_name in CANONICAL_IGNORE_DIRECTORIES or VENV_NAME_PATTERN.match(dir_name):
